@@ -1,20 +1,24 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 
 public class PlayerMovement : MonoBehaviour
 {
-    // Variables for movement
-    public float moveSpeed = 5f; // Speed of the player movement
+    [Header("Movement Variables")]
+    [SerializeField]private float moveSpeed = 2f; // Speed of the player movement
     private Rigidbody2D rb; // Reference to the Rigidbody2D component for physics-based movement
     private float move; // Variable to store horizontal input
 
         
+    [Header("Jump Check Variables")]
     private bool isGrounded; // Reference to the IsGrounded component to check if the player is on the ground
-    public Transform groundCheck; // Transform used to check if the player is grounded
-    public float groundCheckRadius = 0.1f; // Radius for checking if the player is grounded
-    public LayerMask groundLayer; // Layer mask to specify what is considered ground
-    public float jumpForce = 10f; // Force applied when the player jumps
+    [SerializeField]private Transform groundCheck; // Transform used to check if the player is grounded
+    [SerializeField]private float groundCheckRadius = 0.1f; // Radius for checking if the player is grounded
+    [SerializeField]private LayerMask groundLayer; // Layer mask to specify what is considered ground
+    [SerializeField]private float jumpForce = 3f; // Force applied when the player jumps
 
     private Animator anim; // Reference to the Animator component for handling animations
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -22,10 +26,10 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>(); // Get the Rigidbody2D component attached to the player
         anim = GetComponent<Animator>(); // Get the Animator component attached to the player
     }
-
-    // Update is called once per frame
+    
     private bool hasAirJump; // Track if the player has used their air jump
 
+    // Update is called once per frame
     void Update()
     {
         move = Input.GetAxisRaw("Horizontal"); // Get horizontal input (A/D or Left/Right arrow keys)
@@ -63,5 +67,13 @@ public class PlayerMovement : MonoBehaviour
     {
         // Check if the player is grounded by checking for collisions with the ground layer
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+    }
+
+    void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.transform.CompareTag("Deep"))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name); // Reload the current scene if the player collides with an object tagged "Deep"
+        }
     }
 }
