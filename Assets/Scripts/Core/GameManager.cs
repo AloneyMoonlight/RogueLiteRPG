@@ -30,6 +30,25 @@ public class GameManager : MonoBehaviour
         CurrentState = GameState.Playing;
     }
 
+    // ── Escucha cada carga de escena ──────────────────────────────────────────
+    void OnEnable()  => SceneManager.sceneLoaded += OnSceneLoaded;
+    void OnDisable() => SceneManager.sceneLoaded -= OnSceneLoaded;
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == gameScene)
+        {
+            // Siempre que se cargue la escena Game (primera vez, Play Again, etc.)
+            // reseteamos el estado para que la pausa y el input funcionen bien.
+            CurrentState   = GameState.Playing;
+            Time.timeScale = 1f;
+
+            // La música del juego la forzamos aquí como respaldo: aunque
+            // GameInitializer falle o no exista, la música siempre arranca.
+            AudioManager.Instance?.PlayMusic(AudioManager.Instance.gameMusic);
+        }
+    }
+
     void Update()
     {
         if (CurrentState == GameState.Playing && Input.GetKeyDown(KeyCode.Escape))
