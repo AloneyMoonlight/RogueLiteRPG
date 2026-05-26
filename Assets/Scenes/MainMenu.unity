@@ -1423,8 +1423,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AudioManager
   musicSource: {fileID: 0}
   sfxSource: {fileID: 0}
-  musicVolume: 0.5
-  sfxVolume: 1
+  musicVolume: 0.3
+  sfxVolume: 0.3
   menuMusic: {fileID: 8300000, guid: 926f6dc3a9eaa7946a12bca19c8ea7a0, type: 3}
   gameMusic: {fileID: 8300000, guid: c8c5e1415c7d9494dba7801ac0537efc, type: 3}
   gameOverMusic: {fileID: 0}
@@ -1448,6 +1448,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0a9ee67e05e90f4ab8885b52f4abcc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameStats
+  pointsPerKill: 100
+  pointsPerCoin: 10
+  pointsPerCollectible: 50
 --- !u!114 &1255332274
 MonoBehaviour:
   m_ObjectHideFlags: 0
