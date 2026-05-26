@@ -51,7 +51,11 @@ public class AudioManager : MonoBehaviour
 
     public void PlayMusic(AudioClip clip)
     {
-        if (clip == null || musicSource.clip == clip) return;
+        if (clip == null) return;
+        // Solo omite el cambio si el mismo clip YA está sonando activamente.
+        // Si el clip coincide pero la música está parada (ej. vuelta al Game desde
+        // GameOver sin cambio de música), la reinicia igualmente.
+        if (musicSource.clip == clip && musicSource.isPlaying) return;
         musicSource.clip = clip;
         musicSource.Play();
     }
