@@ -2,26 +2,79 @@ using UnityEngine;
 
 public class CameraBehaviour : MonoBehaviour
 {
-    // Variable to hold the target (player) that the camera will follow
-    [SerializeField] private Transform Player;
-    [SerializeField] private Vector3 offset; // Offset from the player position
-    [SerializeField] private float smoothSpeed = 0.125f; // Speed of the camera movement
+    [Header("Seguimiento")]
+    [SerializeField] private Transform player;
+    [SerializeField] private float followSmoothTime = 0.12f;   // qué tan rápido sigue al jugador
 
-    private Vector3 velocity = Vector3.zero; // For SmoothDamp
+    [Header("Lookahead (camara que mira hacia donde vas)")]
+    [Tooltip("Cuántas unidades se desplaza la cámara en la dirección que mira el jugador")]
+    [SerializeField] private float lookAheadDistance = 2.5f;
+    [Tooltip("Tiempo de suavizado del lookahead. Menos = más rápido (recomendado 0.15-0.3)")]
+    [SerializeField] private float lookAheadSmoothTime = 0.2f;
+
+    [Header("Camera Bounds (límites del nivel)")]
+    [SerializeField] private bool  useBounds = false;
+    [SerializeField] private float minX = -10f;
+    [SerializeField] private float maxX = 200f;
+    [SerializeField] private float minY = -5f;
+    [SerializeField] private float maxY = 30f;
+
+    // ── Estado interno ────────────────────────────────────────────────────────
+    private Vector3 followVelocity  = Vector3.zero;
+    private float   lookAheadCurrent  = 0f;
+    private float   lookAheadVelocity = 0f;
+    private Vector3 offset;
+
+    private Rigidbody2D playerRb;
 
     void Start()
     {
-        // Initialize the offset based on the initial position of the camera and the player
-        offset = transform.position - Player.position;
+        if (player == null) return;
+
+        offset   = transform.position - player.position;
+        playerRb = player.GetComponent<Rigidbody2D>();
+
+        // NOTA: el zoom (orthographic size) se controla directamente en el
+        // componente Camera del Inspector. NO lo toques con Scale.
+        // Valores típicos: 5 (lejano) → 4 (normal) → 3 (cercano) → 2 (muy cerca)
     }
 
     void LateUpdate()
     {
-        // Desired position of the camera based on the player's position and the offset
-        Vector3 desiredPosition = Player.position + offset;
-        // Smoothly interpolate between the current position and the desired position using SmoothDamp for better smoothing
-        Vector3 smoothedPosition = Vector3.SmoothDamp(transform.position, desiredPosition, ref velocity, smoothSpeed);
-        // Update the camera's position to the smoothed position
-        transform.position = smoothedPosition;
+        if (player == null) return;
+
+        // ── Dirección del jugador ─────────────────────────────────────────────
+        // Usa la velocidad real si se está moviendo, si no la dirección que mira
+        float facingDir;
+        if (playerRb != null && Mathf.Abs(playerRb.linearVelocity.x) > 0.2f)
+            facingDir = Mathf.Sign(playerRb.linearVelocity.x);
+        else
+            facingDir = player.localScale.x; // 1 = derecha, -1 = izquierda
+
+        // ── Lookahead suavizado ───────────────────────────────────────────────
+        float targetLookAhead = facingDir * lookAheadDistance;
+        lookAheadCurrent = Mathf.SmoothDamp(
+            lookAheadCurrent,
+            targetLookAhead,
+            ref lookAheadVelocity,
+            lookAheadSmoothTime
+        );
+
+        // ── Posición objetivo ─────────────────────────────────────────────────
+        Vector3 desired = player.position + offset + new Vector3(lookAheadCurrent, 0f, 0f);
+
+        if (useBounds)
+        {
+            desired.x = Mathf.Clamp(desired.x, minX, maxX);
+            desired.y = Mathf.Clamp(desired.y, minY, maxY);
+        }
+
+        // ── Smooth follow ─────────────────────────────────────────────────────
+        transform.position = Vector3.SmoothDamp(
+            transform.position,
+            desired,
+            ref followVelocity,
+            followSmoothTime
+        );
     }
 }

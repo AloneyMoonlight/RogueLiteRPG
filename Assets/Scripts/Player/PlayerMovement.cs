@@ -1,79 +1,204 @@
+using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-
 
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("Movement Variables")]
-    [SerializeField]private float moveSpeed = 2f; // Speed of the player movement
-    private Rigidbody2D rb; // Reference to the Rigidbody2D component for physics-based movement
-    private float move; // Variable to store horizontal input
+    [Header("Movement")]
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float jumpForce = 10f;
 
-        
-    [Header("Jump Check Variables")]
-    private bool isGrounded; // Reference to the IsGrounded component to check if the player is on the ground
-    [SerializeField]private Transform groundCheck; // Transform used to check if the player is grounded
-    [SerializeField]private float groundCheckRadius = 0.1f; // Radius for checking if the player is grounded
-    [SerializeField]private LayerMask groundLayer; // Layer mask to specify what is considered ground
-    [SerializeField]private float jumpForce = 3f; // Force applied when the player jumps
+    [Header("Attack Movement")]
+    [Tooltip("Qué fracción de moveSpeed avanza el personaje al atacar (0 = estático, 0.15 = paso adelante)")]
+    [SerializeField] private float attackMoveMultiplier = 0.15f;
 
-    private Animator anim; // Reference to the Animator component for handling animations
+    [Header("Dash")]
+    [SerializeField] private bool  dashEnabled  = true;
+    [SerializeField] private float dashSpeed    = 15f;
+    [SerializeField] private float dashDuration = 0.15f;
+    [SerializeField] private float dashCooldown = 1f;
 
+    [Header("Physics Feel")]
+    [SerializeField] private float fallMultiplier    = 2.5f;
+    [SerializeField] private float lowJumpMultiplier = 2f;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [Header("Ground Check")]
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float     groundCheckRadius = 0.1f;
+    [SerializeField] private LayerMask groundLayer;
+
+    [Header("Coyote Time & Jump Buffer")]
+    [SerializeField] private float coyoteTime    = 0.15f;
+    [SerializeField] private float jumpBufferTime = 0.1f;
+
+    // ── Referencias ───────────────────────────────────────────────────────────
+    private Rigidbody2D  rb;
+    private Animator     anim;
+    private PlayerHealth health;
+    private PlayerCombat combat;   // ← para consultar IsAttacking
+
+    // ── Estado ───────────────────────────────────────────────────────────────
+    private float move;
+    private bool  isGrounded;
+    private bool  hasAirJump;
+
+    private float coyoteTimer;
+    private float jumpBufferTimer;
+
+    private bool  isDashing;
+    private float lastDashTime = -999f;
+
+    // ── Init ──────────────────────────────────────────────────────────────────
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>(); // Get the Rigidbody2D component attached to the player
-        anim = GetComponent<Animator>(); // Get the Animator component attached to the player
+        rb     = GetComponent<Rigidbody2D>();
+        anim   = GetComponent<Animator>();
+        health = GetComponent<PlayerHealth>();
+        combat = GetComponent<PlayerCombat>();
     }
-    
-    private bool hasAirJump; // Track if the player has used their air jump
 
-    // Update is called once per frame
+    // ── Update ────────────────────────────────────────────────────────────────
     void Update()
     {
-        move = Input.GetAxisRaw("Horizontal"); // Get horizontal input (A/D or Left/Right arrow keys)
-        rb.linearVelocity = new Vector2(move * moveSpeed, rb.linearVelocity.y); // Set the horizontal velocity based on input and maintain the current vertical velocity
-        
-        // Flip the player's sprite based on the direction of movement
-        if (move != 0)
+        if (health != null && health.IsDead) return;
+        if (isDashing) return;
+
+        move = Input.GetAxisRaw("Horizontal");
+
+        // Solo cambia de dirección si no está atacando
+        bool attacking = combat != null && combat.IsAttacking;
+        if (!attacking) HandleFlip();
+
+        HandleJump();
+        HandleDash();
+        UpdateAnimator();
+    }
+
+    // ── FixedUpdate ───────────────────────────────────────────────────────────
+    void FixedUpdate()
+    {
+        if (isDashing) return;
+
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+
+        bool attacking = combat != null && combat.IsAttacking;
+
+        if (attacking)
         {
-            transform.localScale = new Vector3(Mathf.Sign(move), 1, 1); // Flip the player's sprite based on the direction of movement
+            // Pequeño paso adelante en la dirección que mira (efecto típico de ataque)
+            float facingDir = transform.localScale.x;
+            rb.linearVelocity = new Vector2(facingDir * moveSpeed * attackMoveMultiplier,
+                                            rb.linearVelocity.y);
+        }
+        else
+        {
+            rb.linearVelocity = new Vector2(move * moveSpeed, rb.linearVelocity.y);
         }
 
-        // Check for jump input
-        if (Input.GetButtonDown("Jump"))
+        ApplyFallMultiplier();
+    }
+
+    // ── Flip ──────────────────────────────────────────────────────────────────
+    private void HandleFlip()
+    {
+        if (move != 0)
+            transform.localScale = new Vector3(Mathf.Sign(move), 1, 1);
+    }
+
+    // ── Jump ──────────────────────────────────────────────────────────────────
+    private void HandleJump()
+    {
+        if (isGrounded)
         {
-            // If the player is grounded, allow them to jump. If they are in the air and have an air jump available, allow them to jump again.
-            if (isGrounded)
+            coyoteTimer = coyoteTime;
+            hasAirJump  = true;
+        }
+        else
+        {
+            coyoteTimer -= Time.deltaTime;
+        }
+
+        if (Input.GetButtonDown("Jump"))
+            jumpBufferTimer = jumpBufferTime;
+        else
+            jumpBufferTimer -= Time.deltaTime;
+
+        if (jumpBufferTimer > 0f)
+        {
+            if (coyoteTimer > 0f)
             {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce); // Apply vertical force for ground jump
-                hasAirJump = true; // Allow one air jump
+                Jump();
+                coyoteTimer     = 0f;
+                jumpBufferTimer = 0f;
             }
             else if (hasAirJump)
             {
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce); // Apply vertical force for air jump
-                hasAirJump = false; // Consume the air jump
+                Jump();
+                hasAirJump      = false;
+                jumpBufferTimer = 0f;
             }
         }
-        // Update the animator parameters based on movement and grounded state
-        anim.SetFloat("Speed", Mathf.Abs(move)); // Set the "Speed" parameter to the absolute value of horizontal movement for running animation
-        anim.SetBool("isGrounded", isGrounded); // Set the "isGrounded" parameter to true or false based on whether the player is on the ground for jumping/falling animations
-        anim.SetFloat("VerticalVelocity", rb.linearVelocity.y); // Set the "VerticalVelocity" parameter to the current vertical velocity for more accurate jumping/falling animations
     }
 
-    // FixedUpdate is called at a fixed interval and is used for physics updates
-    void FixedUpdate()
+    private void Jump()
     {
-        // Check if the player is grounded by checking for collisions with the ground layer
-        isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+        AudioManager.Instance?.PlaySFX(AudioManager.Instance.jumpSFX);
     }
 
+    // ── Dash ──────────────────────────────────────────────────────────────────
+    private void HandleDash()
+    {
+        if (!dashEnabled) return;
+        if (!Input.GetKeyDown(KeyCode.LeftShift)) return;
+        if (Time.time < lastDashTime + dashCooldown) return;
+
+        float dir = move != 0 ? Mathf.Sign(move) : transform.localScale.x;
+        StartCoroutine(DashCoroutine(dir));
+    }
+
+    private IEnumerator DashCoroutine(float direction)
+    {
+        isDashing    = true;
+        lastDashTime = Time.time;
+
+        float originalGravity = rb.gravityScale;
+        rb.gravityScale  = 0f;
+        rb.linearVelocity = new Vector2(direction * dashSpeed, 0f);
+
+        anim?.SetTrigger("Dash");
+        AudioManager.Instance?.PlaySFX(AudioManager.Instance.dashSFX);
+
+        yield return new WaitForSeconds(dashDuration);
+
+        rb.gravityScale = originalGravity;
+        isDashing       = false;
+    }
+
+    // ── Fall multiplier ───────────────────────────────────────────────────────
+    private void ApplyFallMultiplier()
+    {
+        if (rb.linearVelocity.y < 0)
+            rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1) * Time.fixedDeltaTime;
+        else if (rb.linearVelocity.y > 0 && !Input.GetButton("Jump"))
+            rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (lowJumpMultiplier - 1) * Time.fixedDeltaTime;
+    }
+
+    // ── Animator ──────────────────────────────────────────────────────────────
+    private void UpdateAnimator()
+    {
+        if (anim == null) return;
+        anim.SetFloat("Speed",           Mathf.Abs(move));
+        anim.SetBool ("isGrounded",      isGrounded);
+        anim.SetFloat("VerticalVelocity", rb.linearVelocity.y);
+    }
+
+    // ── Trigger: caída al vacío ───────────────────────────────────────────────
     void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.transform.CompareTag("Deep"))
+        if (collision.CompareTag("Deep"))
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name); // Reload the current scene if the player collides with an object tagged "Deep"
+            if (health != null) health.InstantKill();
+            else GameManager.Instance?.GameOver();
         }
     }
 }
