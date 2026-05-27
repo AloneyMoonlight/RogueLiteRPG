@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 917284615269224894, guid: d732c433f052247478d37fac6cedfe30, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7478189960424040069, guid: d732c433f052247478d37fac6cedfe30, type: 3}
       propertyPath: m_LocalPosition.x
       value: 72.03025
@@ -50,10 +54,34 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7478189960424040071, guid: d732c433f052247478d37fac6cedfe30, type: 3}
       propertyPath: m_Name
-      value: Coleccionable Variant
+      value: Coleccionable
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 9149535440953663129, guid: d732c433f052247478d37fac6cedfe30, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7478189960424040071, guid: d732c433f052247478d37fac6cedfe30, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 944673349431214296}
   m_SourcePrefab: {fileID: 100100000, guid: d732c433f052247478d37fac6cedfe30, type: 3}
+--- !u!1 &1169416616733770715 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7478189960424040071, guid: d732c433f052247478d37fac6cedfe30, type: 3}
+  m_PrefabInstance: {fileID: 8646141704982537564}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &944673349431214296
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1169416616733770715}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4d895aac8b40c941b636f0eea99cda7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Collectible
+  type: 0
+  customPoints: 0
+  collectEffect: {fileID: 0}
