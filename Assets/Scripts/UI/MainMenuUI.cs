@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 public class MainMenuUI : MonoBehaviour
 {
     [Header("Nombres de escenas")]
-    [SerializeField] private string gameSceneName = "Game";
+    [SerializeField] private string gameSceneName = "nivel_1";
 
     [Header("Paneles")]
     [SerializeField] private GameObject mainPanel;

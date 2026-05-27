@@ -10,9 +10,9 @@ public class GameManager : MonoBehaviour
 
     [Header("Scene Names")]
     [SerializeField] private string mainMenuScene = "MainMenu";
-    [SerializeField] private string gameScene = "Game";
+    [SerializeField] private string gameScene     = "nivel_1";
     [SerializeField] private string gameOverScene = "GameOver";
-    [SerializeField] private string winScene = "Win";
+    [SerializeField] private string winScene      = "Win";
 
     void Awake()
     {

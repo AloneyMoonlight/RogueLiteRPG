@@ -8,9 +8,11 @@ public class CameraBehaviour : MonoBehaviour
 
     [Header("Lookahead (camara que mira hacia donde vas)")]
     [Tooltip("Cuántas unidades se desplaza la cámara en la dirección que mira el jugador")]
-    [SerializeField] private float lookAheadDistance = 2.5f;
-    [Tooltip("Tiempo de suavizado del lookahead. Menos = más rápido (recomendado 0.15-0.3)")]
-    [SerializeField] private float lookAheadSmoothTime = 0.2f;
+    [SerializeField] private float lookAheadDistance = 1.5f;
+    [Tooltip("Tiempo de suavizado del lookahead. Mayor = más lento y suave (recomendado 0.4-0.8)")]
+    [SerializeField] private float lookAheadSmoothTime = 0.6f;
+    [Tooltip("Velocidad mínima del jugador para activar el lookahead. Evita que la cámara reaccione a micro-movimientos")]
+    [SerializeField] private float lookAheadVelocityThreshold = 1.5f;
 
     [Header("Camera Bounds (límites del nivel)")]
     [SerializeField] private bool  useBounds = false;
@@ -44,12 +46,12 @@ public class CameraBehaviour : MonoBehaviour
         if (player == null) return;
 
         // ── Dirección del jugador ─────────────────────────────────────────────
-        // Usa la velocidad real si se está moviendo, si no la dirección que mira
-        float facingDir;
-        if (playerRb != null && Mathf.Abs(playerRb.linearVelocity.x) > 0.2f)
+        // Solo cambia el objetivo del lookahead cuando el jugador se mueve
+        // con suficiente velocidad. Así la cámara no reacciona a micro-giros
+        // al aterrizar, cambiar dirección rápido o estar casi parado.
+        float facingDir = player.localScale.x; // 1 = derecha, -1 = izquierda
+        if (playerRb != null && Mathf.Abs(playerRb.linearVelocity.x) >= lookAheadVelocityThreshold)
             facingDir = Mathf.Sign(playerRb.linearVelocity.x);
-        else
-            facingDir = player.localScale.x; // 1 = derecha, -1 = izquierda
 
         // ── Lookahead suavizado ───────────────────────────────────────────────
         float targetLookAhead = facingDir * lookAheadDistance;
