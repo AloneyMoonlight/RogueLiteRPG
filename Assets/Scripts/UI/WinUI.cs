@@ -6,7 +6,7 @@ using TMPro;
 public class WinUI : MonoBehaviour
 {
     [Header("Nombre de escenas")]
-    [SerializeField] private string gameSceneName     = "Game";
+    [SerializeField] private string gameSceneName     = "nivel_1";
     [SerializeField] private string mainMenuSceneName = "MainMenu";
 
     [Header("Estadisticas (arrastra TextMeshPro)")]
