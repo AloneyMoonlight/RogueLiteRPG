@@ -1164,7 +1164,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1d96186e4b26494d94ac402252b7f41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameOverUI
-  gameSceneName: Game
+  gameSceneName: nivel_1
   mainMenuSceneName: MainMenu
   scoreText: {fileID: 1406909303}
   enemiesKilledText: {fileID: 0}
@@ -1247,7 +1247,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   mainMenuScene: MainMenu
-  gameScene: Game
+  gameScene: nivel_1
   gameOverScene: GameOver
   winScene: Win
 --- !u!4 &1647365893

@@ -1464,7 +1464,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   mainMenuScene: MainMenu
-  gameScene: Game
+  gameScene: nivel_1
   gameOverScene: GameOver
   winScene: Win
 --- !u!114 &1255332275
@@ -1622,7 +1622,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 65005b9a2fdbb6e4a848116a622d8b18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuUI
-  gameSceneName: Game
+  gameSceneName: nivel_1
   mainPanel: {fileID: 1429400516}
   settingsPanel: {fileID: 675631524}
   playButton: {fileID: 921734484}
