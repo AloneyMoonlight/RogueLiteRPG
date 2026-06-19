@@ -7,6 +7,7 @@ public class MainMenuUI : MonoBehaviour
     [Header("Nombres de escenas")]
     [Tooltip("Primera escena al pulsar Play: la aldea con el NPC y la historia")]
     [SerializeField] private string gameSceneName = "Aldea";
+    [SerializeField] private string creditsSceneName = "Creditos";
 
     [Header("Paneles")]
     [SerializeField] private GameObject mainPanel;
@@ -15,6 +16,7 @@ public class MainMenuUI : MonoBehaviour
     [Header("Botones principales")]
     [SerializeField] private Button playButton;
     [SerializeField] private Button settingsButton;
+    [SerializeField] private Button creditsButton;
     [SerializeField] private Button quitButton;
 
     [Header("Botones de settings")]
@@ -29,6 +31,7 @@ public class MainMenuUI : MonoBehaviour
         // --- Botones ---
         if (playButton != null)     playButton.onClick.AddListener(OnPlay);
         if (settingsButton != null) settingsButton.onClick.AddListener(OnSettings);
+        if (creditsButton != null)  creditsButton.onClick.AddListener(OnCredits);
         if (quitButton != null)     quitButton.onClick.AddListener(OnQuit);
         if (backButton != null)     backButton.onClick.AddListener(OnBack);
 
@@ -71,6 +74,13 @@ public class MainMenuUI : MonoBehaviour
         AudioManager.Instance?.PlaySFX(AudioManager.Instance.buttonClickSFX);
         if (mainPanel != null)     mainPanel.SetActive(false);
         if (settingsPanel != null) settingsPanel.SetActive(true);
+    }
+
+    // ── Botón Créditos ────────────────────────────────────────────────────────
+    private void OnCredits()
+    {
+        AudioManager.Instance?.PlaySFX(AudioManager.Instance.buttonClickSFX);
+        SceneManager.LoadScene(creditsSceneName);
     }
 
     // ── Botón Back (desde Settings) ─────────────────────────────────────────
