@@ -20,6 +20,14 @@ public class WinUI : MonoBehaviour
     [SerializeField] private string   victoryTitle  = "¡VICTORIA!";
     [SerializeField] private string   gameEndTitle  = "¡FIN DEL JUEGO!";
 
+    [Header("Fondo (cambia segun victoria / fin del juego)")]
+    [Tooltip("La imagen de fondo a la que se le cambia el sprite")]
+    [SerializeField] private Image  backgroundImage;
+    [Tooltip("Fondo para la victoria de un nivel intermedio")]
+    [SerializeField] private Sprite victoryBackground;
+    [Tooltip("Fondo para el final del juego")]
+    [SerializeField] private Sprite gameEndBackground;
+
     [Header("Estadisticas (arrastra TextMeshPro)")]
     [SerializeField] private TMP_Text scoreText;
     [SerializeField] private TMP_Text enemiesKilledText;
@@ -53,6 +61,13 @@ public class WinUI : MonoBehaviour
 
         if (continueButton != null)
             continueButton.gameObject.SetActive(!isGameComplete);
+
+        // ── Fondo segun el caso ───────────────────────────────────────────────
+        if (backgroundImage != null)
+        {
+            Sprite bg = isGameComplete ? gameEndBackground : victoryBackground;
+            if (bg != null) backgroundImage.sprite = bg;
+        }
 
         // ── Listeners ─────────────────────────────────────────────────────────
         if (continueButton != null) continueButton.onClick.AddListener(OnContinue);
