@@ -6,6 +6,7 @@ using UnityEngine;
 /// Gestiona: vida, daño recibido, flash de daño, muerte y referencia al jugador.
 /// Cada enemigo hijo implementa OnInterrupted() para cancelar su ataque en curso.
 /// </summary>
+[RequireComponent(typeof(Rigidbody2D))]
 public abstract class EnemyBase : MonoBehaviour, IDamageable
 {
     [Header("Vida")]
@@ -21,6 +22,9 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
     protected int  currentHealth;
     protected bool isDead;
     protected bool isStunned;
+
+    /// <summary>Lo consulta LevelManager para saber si el mapa esta limpio.</summary>
+    public bool IsDead => isDead;
 
     // ── Referencias ──────────────────────────────────────────────────────────
     protected Transform      player;
@@ -74,8 +78,11 @@ public abstract class EnemyBase : MonoBehaviour, IDamageable
 
         GameStats.Instance?.AddKill();
 
-        rb.linearVelocity = Vector2.zero;
-        rb.bodyType        = RigidbodyType2D.Kinematic;
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+            rb.bodyType        = RigidbodyType2D.Kinematic;
+        }
 
         foreach (Collider2D col in GetComponents<Collider2D>())
             col.enabled = false;

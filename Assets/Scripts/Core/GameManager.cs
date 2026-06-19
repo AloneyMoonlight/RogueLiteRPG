@@ -10,9 +10,21 @@ public class GameManager : MonoBehaviour
 
     [Header("Scene Names")]
     [SerializeField] private string mainMenuScene = "MainMenu";
-    [SerializeField] private string gameScene     = "nivel_1";
+    [Tooltip("Primera escena al pulsar Play (la aldea con el NPC)")]
+    [SerializeField] private string firstScene    = "Aldea";
     [SerializeField] private string gameOverScene = "GameOver";
     [SerializeField] private string winScene      = "Win";
+
+    [Header("Escenas jugables")]
+    [Tooltip("Todas las escenas donde se juega (aldea + niveles). En ellas se " +
+             "reinicia el estado a Playing y suena la musica de juego.")]
+    [SerializeField] private string[] gameplayScenes = { "Aldea", "nivel_1", "nivel_2", "nivel_3" };
+
+    // ── Estado de progresion entre niveles (persistente) ──────────────────────
+    /// <summary>Escena que cargara el boton "Continuar" de la pantalla de victoria.</summary>
+    public string NextSceneToLoad { get; private set; }
+    /// <summary>Si es true, la pantalla de victoria muestra "Fin del juego".</summary>
+    public bool   IsGameComplete  { get; private set; }
 
     void Awake()
     {
@@ -36,17 +48,23 @@ public class GameManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == gameScene)
+        if (IsGameplayScene(scene.name))
         {
-            // Siempre que se cargue la escena Game (primera vez, Play Again, etc.)
-            // reseteamos el estado para que la pausa y el input funcionen bien.
+            // Cualquier escena jugable (primera vez, siguiente nivel, retry...):
+            // reseteamos el estado para que pausa e input funcionen bien.
             CurrentState   = GameState.Playing;
             Time.timeScale = 1f;
 
-            // La música del juego la forzamos aquí como respaldo: aunque
-            // GameInitializer falle o no exista, la música siempre arranca.
+            // Musica de juego como respaldo robusto (aunque GameInitializer falle).
             AudioManager.Instance?.PlayMusic(AudioManager.Instance.gameMusic);
         }
+    }
+
+    private bool IsGameplayScene(string name)
+    {
+        foreach (string s in gameplayScenes)
+            if (s == name) return true;
+        return false;
     }
 
     void Update()
@@ -83,33 +101,39 @@ public class GameManager : MonoBehaviour
         StartCoroutine(LoadSceneRealtime(gameOverScene, 1.5f));
     }
 
-    public void Win()
+    // ── Nivel completado (todos los enemigos muertos + coleccionables) ─────────
+    /// <summary>
+    /// Lo llama LevelManager cuando se limpia un mapa.
+    /// nextScene = a donde ir tras la victoria; isFinal = ultimo mapa del juego.
+    /// </summary>
+    public void LevelComplete(string nextScene, bool isFinal)
     {
         if (CurrentState == GameState.Win) return;
-        CurrentState = GameState.Win;
+        CurrentState    = GameState.Win;
+        NextSceneToLoad = nextScene;
+        IsGameComplete  = isFinal;
         GameStats.Instance?.StopTracking();
         StartCoroutine(LoadSceneRealtime(winScene, 1f));
     }
 
-    public void StartGame()
+    // Compatibilidad con WinZone / codigo antiguo: victoria simple sin progresion
+    public void Win()
     {
-        CurrentState = GameState.Playing;
-        Time.timeScale = 1f;
-        GameStats.Instance?.ResetStats();
-        SceneManager.LoadScene(gameScene);
+        LevelComplete(firstScene, true);
     }
 
-    public void RestartGame()
+    public void StartGame()
     {
-        CurrentState = GameState.Playing;
+        CurrentState   = GameState.Playing;
         Time.timeScale = 1f;
+        IsGameComplete = false;
         GameStats.Instance?.ResetStats();
-        SceneManager.LoadScene(gameScene);
+        SceneManager.LoadScene(firstScene);
     }
 
     public void GoToMainMenu()
     {
-        CurrentState = GameState.Playing;
+        CurrentState   = GameState.Playing;
         Time.timeScale = 1f;
         SceneManager.LoadScene(mainMenuScene);
     }

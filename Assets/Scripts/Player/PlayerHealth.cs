@@ -5,7 +5,7 @@ using UnityEngine.Events;
 public class PlayerHealth : MonoBehaviour, IDamageable
 {
     [Header("Vida")]
-    [SerializeField] private int maxHealth = 3;
+    [SerializeField] private int maxHealth = 100;
     private int currentHealth;
 
     [Header("Invencibilidad tras recibir daño")]
@@ -75,6 +75,9 @@ public class PlayerHealth : MonoBehaviour, IDamageable
     {
         if (IsDead) return;   // guarda contra doble llamada
         IsDead = true;
+
+        // 0. Congelar el tiempo de partida YA (asi el reloj de Game Over es exacto)
+        GameStats.Instance?.StopTracking();
 
         // 1. Cortar movimiento y combate
         if (movement != null) movement.enabled = false;

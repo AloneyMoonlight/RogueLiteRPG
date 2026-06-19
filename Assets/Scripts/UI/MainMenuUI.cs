@@ -5,7 +5,8 @@ using UnityEngine.SceneManagement;
 public class MainMenuUI : MonoBehaviour
 {
     [Header("Nombres de escenas")]
-    [SerializeField] private string gameSceneName = "nivel_1";
+    [Tooltip("Primera escena al pulsar Play: la aldea con el NPC y la historia")]
+    [SerializeField] private string gameSceneName = "Aldea";
 
     [Header("Paneles")]
     [SerializeField] private GameObject mainPanel;

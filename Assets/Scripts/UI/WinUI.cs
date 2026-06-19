@@ -3,11 +3,22 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 
+/// <summary>
+/// Pantalla de Victoria. Tiene dos modos segun GameManager:
+///   • Nivel intermedio  -> Titulo "¡VICTORIA!"   + boton CONTINUAR (siguiente nivel)
+///   • Nivel final        -> Titulo "¡FIN DEL JUEGO!" + sin Continuar (solo Menu)
+/// </summary>
 public class WinUI : MonoBehaviour
 {
     [Header("Nombre de escenas")]
-    [SerializeField] private string gameSceneName     = "nivel_1";
+    [Tooltip("Fallback si GameManager no indica el siguiente nivel")]
+    [SerializeField] private string fallbackNextScene = "nivel_1";
     [SerializeField] private string mainMenuSceneName = "MainMenu";
+
+    [Header("Titulo")]
+    [SerializeField] private TMP_Text titleText;
+    [SerializeField] private string   victoryTitle  = "¡VICTORIA!";
+    [SerializeField] private string   gameEndTitle  = "¡FIN DEL JUEGO!";
 
     [Header("Estadisticas (arrastra TextMeshPro)")]
     [SerializeField] private TMP_Text scoreText;
@@ -16,17 +27,37 @@ public class WinUI : MonoBehaviour
     [SerializeField] private TMP_Text timeSurvivedText;
 
     [Header("Botones")]
-    [SerializeField] private Button playAgainButton;
+    [Tooltip("Avanza al siguiente nivel. Se oculta en el nivel final.")]
+    [SerializeField] private Button continueButton;
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private Button quitButton;
+
+    private bool   isGameComplete;
+    private string nextScene;
 
     void Start()
     {
         Time.timeScale = 1f;
 
-        if (playAgainButton != null) playAgainButton.onClick.AddListener(OnPlayAgain);
-        if (mainMenuButton != null)  mainMenuButton.onClick.AddListener(OnMainMenu);
-        if (quitButton != null)      quitButton.onClick.AddListener(OnQuit);
+        // ── Leer el estado de progresion del GameManager ──────────────────────
+        if (GameManager.Instance != null)
+        {
+            isGameComplete = GameManager.Instance.IsGameComplete;
+            nextScene      = GameManager.Instance.NextSceneToLoad;
+        }
+        if (string.IsNullOrEmpty(nextScene)) nextScene = fallbackNextScene;
+
+        // ── Titulo + visibilidad del boton Continuar ──────────────────────────
+        if (titleText != null)
+            titleText.text = isGameComplete ? gameEndTitle : victoryTitle;
+
+        if (continueButton != null)
+            continueButton.gameObject.SetActive(!isGameComplete);
+
+        // ── Listeners ─────────────────────────────────────────────────────────
+        if (continueButton != null) continueButton.onClick.AddListener(OnContinue);
+        if (mainMenuButton != null) mainMenuButton.onClick.AddListener(OnMainMenu);
+        if (quitButton != null)     quitButton.onClick.AddListener(OnQuit);
 
         DisplayStats();
 
@@ -53,17 +84,20 @@ public class WinUI : MonoBehaviour
         }
     }
 
-    private void OnPlayAgain()
+    // ── Continuar al siguiente nivel (NO resetea stats: se acumulan) ───────────
+    private void OnContinue()
     {
         AudioManager.Instance?.PlaySFX(AudioManager.Instance.buttonClickSFX);
-        GameStats.Instance?.ResetStats();
-        SceneManager.LoadScene(gameSceneName);
+        SceneManager.LoadScene(nextScene);
     }
+
+    // ── Volver al menu (el New Game posterior reseteara las stats) ─────────────
     private void OnMainMenu()
     {
         AudioManager.Instance?.PlaySFX(AudioManager.Instance.buttonClickSFX);
         SceneManager.LoadScene(mainMenuSceneName);
     }
+
     private void OnQuit()
     {
         AudioManager.Instance?.PlaySFX(AudioManager.Instance.buttonClickSFX);

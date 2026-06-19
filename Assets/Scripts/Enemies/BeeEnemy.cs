@@ -53,6 +53,9 @@ public class BeeEnemy : EnemyBase
     private static readonly int IsTiredHash = Animator.StringToHash("IsTired");
     private static readonly int DiveHash    = Animator.StringToHash("Dive");
 
+    // Default de daño al añadir el componente (la abeja hace 20)
+    void Reset() { contactDamage = 20; maxHealth = 3; }
+
     // ── Init ──────────────────────────────────────────────────────────────────
     protected override void Awake()
     {

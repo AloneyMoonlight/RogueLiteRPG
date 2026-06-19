@@ -39,6 +39,9 @@ public class BoarEnemy : EnemyBase
     private static readonly int WindupHash    = Animator.StringToHash("Windup");
     private static readonly int IsChargingHash = Animator.StringToHash("IsCharging");
 
+    // Default de daño al añadir el componente (el jabalí hace 15)
+    void Reset() { contactDamage = 15; maxHealth = 4; }
+
     // ── Update ────────────────────────────────────────────────────────────────
     void Update()
     {

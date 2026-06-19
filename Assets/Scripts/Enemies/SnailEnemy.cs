@@ -23,7 +23,7 @@ public class SnailEnemy : EnemyBase
     [SerializeField] private float detectRange  = 5f;
 
     [Header("Ataque")]
-    [SerializeField] private int       attackDamage   = 1;
+    [SerializeField] private int       attackDamage   = 10;
     [SerializeField] private float     attackRange    = 1.2f;
     [SerializeField] private float     attackDuration = 0.7f;
     [SerializeField] private float     attackHitFrac  = 0.55f; // fracción del clip en que golpea
