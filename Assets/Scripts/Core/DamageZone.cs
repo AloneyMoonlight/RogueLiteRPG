@@ -14,7 +14,7 @@ public class DamageZone : MonoBehaviour
 {
     [Header("Daño")]
     [Tooltip("Puntos de vida que quita al jugador en cada contacto")]
-    [SerializeField] private int damage = 10;
+    [SerializeField] private int damage = 1;
 
     [Header("Muerte instantanea (opcional)")]
     [Tooltip("Si está activo, mata al jugador de un golpe ignorando la armadura/invencibilidad")]

@@ -3,10 +3,10 @@ using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Coloca este script en un GameObject vacio (ej. "LevelManager") en cada
-/// escena de NIVEL con enemigos (nivel_1, nivel_2, nivel_3).
+/// escena de NIVEL (nivel_1, nivel_2, nivel_3).
 ///
-/// Detecta cuando el mapa esta limpio: no quedan coleccionables NI enemigos
-/// vivos. En ese momento dispara la pantalla de Victoria.
+/// Detecta cuando el mapa esta limpio: no quedan coleccionables por recoger.
+/// En ese momento dispara la pantalla de Victoria.
 ///   • Si isFinalLevel = false  -> Victoria con boton "Continuar" -> nextScene
 ///   • Si isFinalLevel = true   -> pantalla "Fin del juego"
 ///
@@ -19,10 +19,6 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private string nextSceneName = "nivel_2";
     [Tooltip("Marca esto en el ULTIMO nivel -> mostrara 'Fin del juego'")]
     [SerializeField] private bool   isFinalLevel  = false;
-
-    [Header("Condiciones de victoria")]
-    [SerializeField] private bool requireCollectibles = true;
-    [SerializeField] private bool requireEnemiesDead  = true;
 
     [Header("Avanzado")]
     [Tooltip("Cada cuanto comprueba el estado del nivel (segundos)")]
@@ -52,18 +48,8 @@ public class LevelManager : MonoBehaviour
 
     private int CountRemaining()
     {
-        int total = 0;
-
-        if (requireCollectibles)
-            total += FindObjectsByType<Collectible>(FindObjectsSortMode.None).Length;
-
-        if (requireEnemiesDead)
-        {
-            foreach (EnemyBase e in FindObjectsByType<EnemyBase>(FindObjectsSortMode.None))
-                if (!e.IsDead) total++;
-        }
-
-        return total;
+        // El mapa se completa al recoger todos los coleccionables.
+        return FindObjectsByType<Collectible>(FindObjectsSortMode.None).Length;
     }
 
     private void Complete()

@@ -5,7 +5,7 @@ using UnityEngine.Events;
 public class PlayerHealth : MonoBehaviour, IDamageable
 {
     [Header("Vida")]
-    [SerializeField] private int maxHealth = 100;
+    [SerializeField] private int maxHealth = 5;
     private int currentHealth;
 
     [Header("Invencibilidad tras recibir daño")]
