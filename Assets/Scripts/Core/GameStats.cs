@@ -27,6 +27,7 @@ public class GameStats : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+        transform.SetParent(null);        // DontDestroyOnLoad requiere objeto raiz
         DontDestroyOnLoad(gameObject);
     }
 

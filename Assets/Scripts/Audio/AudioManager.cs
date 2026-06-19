@@ -35,6 +35,7 @@ public class AudioManager : MonoBehaviour
             return;
         }
         Instance = this;
+        transform.SetParent(null);        // DontDestroyOnLoad requiere objeto raiz
         DontDestroyOnLoad(gameObject);
 
         if (musicSource == null)

@@ -34,6 +34,7 @@ public class GameManager : MonoBehaviour
             return;
         }
         Instance = this;
+        transform.SetParent(null);        // DontDestroyOnLoad requiere objeto raiz
         DontDestroyOnLoad(gameObject);
     }
 
