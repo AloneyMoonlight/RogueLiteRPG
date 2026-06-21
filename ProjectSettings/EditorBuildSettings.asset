@@ -9,11 +9,26 @@ EditorBuildSettings:
     path: Assets/Scenes/MainMenu.unity
     guid: b48965d0c43220f4ca2f359ec4abedc1
   - enabled: 1
+    path: Assets/Scenes/Aldea.unity
+    guid: d307237665439b948bf47f5b44a28c24
+  - enabled: 1
     path: Assets/Scenes/nivel_1.unity
     guid: 63615646a50f34242aaea0dd7d653101
   - enabled: 1
+    path: Assets/Scenes/nivel_2.unity
+    guid: 9273417380f9b844989451f17bf61262
+  - enabled: 1
+    path: Assets/Scenes/nivel_3.unity
+    guid: 98ea36f6a20470b4fa2aaee9de574cc6
+  - enabled: 1
     path: Assets/Scenes/GameOver.unity
     guid: f41b57cf1f91dd5428835570aa70427e
+  - enabled: 1
+    path: Assets/Scenes/Tutorial.unity
+    guid: fd9b6a8cc7b905049950f39c66619c1c
+  - enabled: 1
+    path: Assets/Scenes/Creditos.unity
+    guid: 4545ced677e71fd4dae60348ab799cf4
   - enabled: 1
     path: Assets/Scenes/Win.unity
     guid: 396faaee82b919844bf2211e81b01066
